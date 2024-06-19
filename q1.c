@@ -1,61 +1,148 @@
-#define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
+#ifndef _CHESSPROJECT_H
+#define _CHESSPROJECT_H
+#include "chessProject.h"
+#endif 
 
-#define COL 5
-#define ROW 5
-
-typedef char chessPos[2];
-typedef struct _chessPosArray {
-	unsigned int size;
-	chessPos* positions;
-} chessPosArray;
-
-
-chessPosArray*** validKnightMoves();
-//void display(chessPosList*);
-
-void main() {
-
+bool isValidPosition(int row, int col){
+    return row >= 0 && row < ROW && col >= 0 && col < COL;
 }
 
 chessPosArray*** validKnightMoves() {
+    int i, r, c;
+    chessPosArray*** table = NULL;
 
+    table = (chessPosArray***)malloc(ROW * sizeof(chessPosArray**));
+    if (table == NULL) {
+        printf("Error! allocation failed");
+        exit(1);
+    }
+    for (i = 0; i < ROW; i++) {
+        table[i] = (chessPosArray**)malloc(COL * sizeof(chessPosArray*));
+        if (table[i] == NULL) {
+            printf("Error! allocation failed");
+            exit(1);
+        }
+    }
+    for (r = 0; r < ROW; r++) {
+
+        for (c = 0; c < COL; c++) {
+
+            table[r][c] = (chessPosArray*)malloc(sizeof(chessPosArray));
+            if (table[r][c] == NULL) {
+                printf("Error! allocation failed");
+                exit(1);
+            }
+            chessPosArray curr = createNewChessPosArr(r, c);
+            table[r][c]->positions = curr.positions;
+            table[r][c]->size = curr.size;
+        }
+    }
+    return table;
 }
 
-chessPosArray** buildChessTable() {
-	int r, c;
-	chessPosArray** currRow = NULL, *currCol = NULL;
-	chessPos* rowPositions = NULL, currPositions = NULL;
-	currRow = (chessPosArray*)malloc(sizeof(chessPosArray));
-	if (currRow == NULL) {
-		printf("Error! allocation failed");
-		exit(1);
-	}
-	(*currRow)->size = ROW;
-	rowPositions = (chessPos*)malloc(ROW * sizeof(chessPos));
-	if (rowPositions == NULL) {
-		printf("Error! allocation failed");
-		exit(1);
-	}
-	(*currRow)->positions = rowPositions;
+chessPosArray createNewChessPosArr(int row, int col) {
+    chessPosArray res;
+    chessPos* positions = NULL;
+    int size;
 
-	for (c = 0; c < COL; c++) {
-		currCol = (chessPosArray*)malloc(sizeof(chessPosArray));
-		if (currCol == NULL) {
-			printf("Error! allocation failed");
-			exit(1);
-		}
-		currCol->size = COL;
-		rowPositions[c] = &(currCol->positions); // in each index of row, there is a pointer to a column (5 col)
-		//currCol->positions = ;
-	}
-
+    size = calcNewSize(row, col);
+    positions = (chessPos*)malloc(size * sizeof(chessPos));
+    setValidPos(positions, row, col);
+    res.positions = positions;
+    res.size = size;
+    return res;
 }
 
+void setValidPos(chessPos* positions, int currRow, int currCol) {
+    int i = 0;
+    
+    if (currRow - 2 < ROW && currRow - 2 >= 0 && currCol + 1 < COL) {
+        insertNewChessPos(positions, i, currRow - 2, currCol + 1);
+        i++;
+    }
+    if (currRow - 1 < ROW && currRow - 1 >= 0 && currCol + 2 < COL) {
+        insertNewChessPos(positions, i, currRow - 1, currCol + 2);
+        i++;
+    }
+    if (currRow + 1 < ROW && currCol + 2 < COL) {
+        insertNewChessPos(positions, i, currRow + 1, currCol + 2);
+        i++;
+    }
+    if (currRow + 2 < ROW && currCol + 1 < COL) {
+        insertNewChessPos(positions, i, currRow + 2, currCol + 1);
+        i++;
+    }
+    if (currRow + 2 < ROW && currCol - 1 < COL && currCol - 1 >= 0) {
+        insertNewChessPos(positions, i, currRow + 2, currCol - 1);
+        i++;
+    }
+    if (currRow + 1 < ROW && currCol - 2 < COL && currCol - 2 >= 0) {
+        insertNewChessPos(positions, i, currRow + 1, currCol - 2);
+        i++;
+    }
+    if (currRow - 1 < ROW && currCol - 2 < COL && currRow - 1 >= 0 && currCol - 2 >= 0) {
+        insertNewChessPos(positions, i, currRow - 1, currCol - 2);
+        i++;
+    }
+    if (currRow - 2 < ROW && currCol - 1 < COL && currRow - 2 >= 0 && currCol - 1 >= 0) {
+        insertNewChessPos(positions, i, currRow - 2, currCol - 1);
+        i++;
+    }
+}
 
-//void display(chessPosList* lst) {
-//
-//}
+int calcNewSize(int currRow, int currCol) {
+    int newSize = 0;
+    if (currRow - 2 < ROW && currRow - 2 >= 0 && currCol + 1 < COL) {
+        newSize++;
+    }
+    if (currRow - 1 < ROW && currRow - 1 >= 0 && currCol + 2 < COL) {
+        newSize++;
+    }
+    if (currRow + 1 < ROW && currCol + 2 < COL ) {
+        newSize++;
+    }
+    if (currRow + 2 < ROW && currCol + 1 < COL) {
+        newSize++;
+    }
+    if (currRow + 2 < ROW && currCol - 1 < COL && currCol - 1 >= 0) {
+        newSize++;
+    }
+    if (currRow + 1 < ROW && currCol - 2 < COL && currCol - 2 >= 0) {
+        newSize++;
+    }
+    if (currRow - 1 < ROW && currCol - 2 < COL && currRow - 1 >= 0 && currCol - 2 >= 0) {
+        newSize++;
+    }
+    if (currRow - 2 < ROW && currCol - 1 < COL && currRow - 2 >= 0 && currCol - 1 >= 0) {
+        newSize++;
+    }
+    return newSize;
+}
+
+void createNewChessPos(int row, int col, chessPos* res) {
+    char chRow = row + 'A';
+    char chCol = col + 1 + '0';
+    **res = chRow;
+    *(*res + 1) = chCol;
+}
+
+void insertNewChessPos(chessPos* cpa, int index, int row, int col) {
+    chessPos newCP;
+    createNewChessPos(row, col, &newCP);
+    cpa[index][0] = newCP[0];
+    cpa[index][1] = newCP[1];
+}
+
+void freeChessTable(chessPosArray*** table){
+    int r, c;
+    
+    for (r = 0; r < ROW; r++){ // iterate over each position on the chessboard
+
+        for (c = 0; c < COL; c++){
+            free(table[r][c]->positions);
+            free(table[r][c]);
+        }
+        free(table[r]); // free the memory for each row
+    }
+    free(table); // free the memory for the table
+}
